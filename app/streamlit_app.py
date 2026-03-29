@@ -1,19 +1,36 @@
 import streamlit as st
 import joblib
-import sys
 import os
+import re
+import nltk
+from nltk.corpus import stopwords
 
-sys.path.append(os.path.abspath("../src"))
+# ✅ Download stopwords (safe for cloud)
+nltk.download('stopwords')
 
-from preprocess import clean_text
+# ================= PREPROCESS FUNCTION =================
+stop_words = set(stopwords.words('english'))
 
-# Load model
-model = joblib.load('../models/fake_news_model.pkl')
-vectorizer = joblib.load('../models/vectorizer.pkl')
+def clean_text(text):
+    text = text.lower()
+    text = re.sub(r'[^a-zA-Z]', ' ', text)
+    words = text.split()
+    words = [w for w in words if w not in stop_words]
+    return " ".join(words)
 
+# ================= LOAD MODEL =================
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(current_dir, "..", "models", "fake_news_model.pkl")
+vectorizer_path = os.path.join(current_dir, "..", "models", "vectorizer.pkl")
+
+model = joblib.load(model_path)
+vectorizer = joblib.load(vectorizer_path)
+
+# ================= UI =================
 st.title("📰 Fake News Detection App")
 
-st.write("Enter a news article to check if it's real or fake.")
+st.write("Enter a news article to check if it is Real or Fake")
 
 user_input = st.text_area("News Content")
 
